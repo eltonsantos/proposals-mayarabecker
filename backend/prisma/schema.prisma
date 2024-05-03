@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGODB_URI")
+}
+
+model User {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  email     String    @unique
+  password  String
+  name      String
+  role      String
+  lastLogin DateTime?
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @default(now())
+
+  @@map("users")
+}
+
+model Proposal {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  title             String
+  description       String
+  discount          Int?
+  numberInstallment Int?
+  customer          String?
+  createdAt         DateTime? @default(now())
+  updatedAt         DateTime? @default(now())
+  services          Service[] @relation(references: [id], fields: [serviceIDs])
+  serviceIDs        String[]  @db.ObjectId
+
+  @@map("proposals")
+}
+
+model Service {
+  id                String       @id @default(auto()) @map("_id") @db.ObjectId
+  name              String
+  description       String
+  value             Int?
+  numberInstallment Int?
+  createdAt         DateTime?    @default(now())
+  updatedAt         DateTime?    @default(now())
+  serviceType       ServiceType? @relation(fields: [serviceTypeId], references: [id])
+  serviceTypeId     String?      @db.ObjectId
+  proposals         Proposal[]   @relation(references: [id], fields: [proposalIDs])
+  proposalIDs       String[]     @db.ObjectId
+
+  @@map("services")
+}
+
+model Step {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+  order       Int
+  visible     Boolean
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @default(now())
+
+  @@map("steps")
+}
+
+model ServiceType {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  tax         String?
+  complement  String?
+  observation String?
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @default(now())
+  services    Service[]
+
+  @@map("services_types")
+}
